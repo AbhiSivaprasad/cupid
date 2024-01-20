@@ -43,3 +43,28 @@ const BROWSER_DATA_PATH = path.resolve(path.join("./", BROWSER_DATA_DIR_NAME));
     await driver.quit();
   }
 })();
+
+// Interact with Tinder App
+//
+//  extract_profile: extract all information from candidate profile
+//    output: images, text, information with ordering
+//
+//  do_swipe: actually swipe
+//    input: yes_or_no
+//
+//  set_profile: set all information from profile
+//
+//  input: ordered images, text, information
+//
+//  check_matches -> Receives ordered list of matches
+//
+//  click_on_match(match_name)
+//
+//  click_match_profile()
+//
+//  send_chat(text)
+//
+//  change_settings:
+//
+//  input: settings object
+//
