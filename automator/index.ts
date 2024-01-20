@@ -7,6 +7,9 @@ import {
   WebDriver,
   ChromiumWebDriver,
   Capabilities,
+  WebElement,
+  Actions,
+  Origin,
 } from "selenium-webdriver";
 import { sleep } from "./util";
 import { Options } from "selenium-webdriver/chrome.js";
@@ -25,7 +28,7 @@ const BROWSER_DATA_PATH = path.resolve(path.join("./", BROWSER_DATA_DIR_NAME));
   chromeCapabilities.set("chromeOptions", chromeOptions);
 
   const options = new Options();
-  options.windowSize({ width: 100, height: 100 });
+  // options.windowSize({ width: 100, height: 100 });
   options.addArguments(`user-data-dir=${BROWSER_DATA_PATH}`);
 
   let driver = await new Builder()
@@ -91,16 +94,56 @@ export interface CandidateProfile {
   lookingFor?: string;
 }
 
-export async function findMoreInfoButton(driver: WebDriver) {
+export async function getExpandButton(driver: WebDriver): Promise<WebElement> {
+  const MORE_INFO_SVG =
+    "M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z";
   const buttons = await driver.findElements(By.css("button"));
-  console.log(`found ${buttons.length} buttons on the page`);
-  console.log(buttons);
+
+  const expand = await driver.findElement(
+    By.css(".D\\(f\\).Ai\\(c\\).Miw\\(0\\)")
+  );
+
+  return expand;
+
+  for (const button of buttons) {
+    try {
+      const svg = await button.findElement(By.css("svg"));
+      const path = await button.findElement(By.css("svg path"));
+      const d = await path.getAttribute("d");
+
+      console.log("d " + d);
+
+      if (d === MORE_INFO_SVG) {
+        const parent = await driver.executeScript(
+          "return arguments[0].parentNode",
+          button
+        );
+        console.log("parent", parent);
+        return parent as WebElement;
+      }
+    } catch (e) {}
+  }
+
+  throw new Error("unable to find more info button");
 }
 
 export async function extractCurrentProfile(
   driver: WebDriver
 ): Promise<CandidateProfile> {
-  const moreInfoButton = await findMoreInfoButton(driver);
+  const moreInfoButton = await getExpandButton(driver);
+  console.log("\n\n***\n\n");
+  console.log("found more info button", await moreInfoButton.getTagName());
+  console.log(moreInfoButton);
+
+  await driver.executeScript("return arguments[0].click()", moreInfoButton);
+
+  // await moreInfoButton.click();
+  // const location = await moreInfoButton.getRect();
+  // const size = await moreInfoButton.getSize();
+  // const clickLocation = {
+  //   x: location.x + size.width / 2,
+  //   y: location.y + size.height / 2,
+  // };
 
   return {
     images: [],

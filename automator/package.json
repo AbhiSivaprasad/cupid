@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "yarn ts-node-dev index.ts"
+    "start": "yarn ts-node index.ts"
   },
   "keywords": [],
   "author": "",
@@ -14,8 +14,9 @@
     "ts-node-dev": "^2.0.0"
   },
   "dependencies": {
+    "mocha": "^10.2.0",
     "selenium-webdriver": "^4.16.0",
-    "typescript": "^5.3.3",
-    "mocha": "^10.2.0"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
