@@ -1,6 +1,10 @@
+# Custom
 .env
 node_modules
-#
+browser_data
+temp
+.DS_Store
+
 # image file types
 *.jpg
 *.jpeg

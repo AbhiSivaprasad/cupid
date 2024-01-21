@@ -14,5 +14,6 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true
-  }
+  },
+  "exclude": ["node_modules", "build"]
 }
