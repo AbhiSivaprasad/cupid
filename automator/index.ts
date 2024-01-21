@@ -15,6 +15,7 @@ import { sleep } from "./util";
 import { Options } from "selenium-webdriver/chrome.js";
 import * as fs from "fs";
 import * as path from "path";
+import { isNamespaceExport } from "typescript";
 
 const BROWSER_DATA_DIR_NAME = "browser_data";
 const BROWSER_DATA_PATH = path.resolve(path.join("./", BROWSER_DATA_DIR_NAME));
@@ -118,7 +119,24 @@ export async function extractInfoFromFirstContainer(
 ): Promise<{ name: string; age: string }> {
   console.log(firstContainer);
 
-  return { name: "test name", age: "69" };
+  let name = "unknown";
+  let age = "unknown";
+
+  try {
+    const nameContainer = await firstContainer.findElement(
+      By.css("div div div h1")
+    );
+    name = await nameContainer.getText();
+  } catch (e) {}
+
+  try {
+    const ageContainer = await firstContainer.findElement(
+      By.css("div div span")
+    ); // age
+    age = await ageContainer.getText();
+  } catch (e) {}
+
+  return { name, age };
 }
 
 export async function getSecondProfileInfoContainer(
