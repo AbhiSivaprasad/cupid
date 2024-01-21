@@ -1,4 +1,4 @@
-# Custom
+*.npy
 .env
 node_modules
 browser_data
@@ -15,3 +15,4 @@ temp
 **/__pycache__/
 
 
+backend/profiles.json

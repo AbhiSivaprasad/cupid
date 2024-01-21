@@ -1,24 +1,19 @@
 import axios from 'axios';
+import { randomNormal } from 'd3-random';
+import TinderMongoClient, { ImageCandidate } from './db/client';
 import {
   ProfileInfo,
   doSwipe,
   extractProfile,
-  goToMyProfile,
   goToCandidates,
+  goToMyProfile,
 } from './improve-profile/stubbedfunctions';
-<<<<<<< HEAD
-import { delay } from './utils';
-import { MongoClient, MongoClient } from 'mongodb';
-import TinderMongoClient, { ImageCandidate } from './db/client';
-import { randomNormal } from 'd3-random';
+import { sleep } from './utils';
 
 const client = new TinderMongoClient(
   'mongodb+srv://hingebot.nuxwjjl.mongodb.net/',
   'prod',
 );
-=======
-import { sleep } from './utils';
->>>>>>> 81ab8c31fde8ca82eeeb3f06f18e65b9dd290fc6
 export function doSetup() {
   // add all the setup you need here so that all of the functions in stubbedFunctions are fully callable.
 }
@@ -49,30 +44,29 @@ export async function considerProfileUpdates(userId: string): Promise<void> {
     const matchRate = candidate.swipesWithImage / candidate.matchesWithImage;
     const posteriorMatchRate =
       (totalMatches + scaledTotalMatches) / (totalSwipes + scaledTotalSwipes);
-    const variance = posteriorMatchRate * (1 - posteriorMatchRate) // This is approximate
+    const variance = posteriorMatchRate * (1 - posteriorMatchRate); // This is approximate
 
     const randomSample = randomNormal(
       posteriorMatchRate,
       Math.sqrt(variance),
     )();
-    return {candidate, randomSample};
+    return { candidate, randomSample };
   });
-  sampledMatchRate.sort((a, b) => a.randomSample - b.randomSample)
-  const newExperiment = sampledMatchRate.at(-1)!
-  updateTopPhoto(newExperiment.candidate)
+  sampledMatchRate.sort((a, b) => a.randomSample - b.randomSample);
+  const newExperiment = sampledMatchRate.at(-1)!;
+  updateTopPhoto(newExperiment.candidate);
 }
 
-export async function updateTopPhoto(candidate: ImageCandidate){
-    const candidateWithData = await client.getImageData(candidate._id)
-    await goToMyProfile()
-    const myProfile = await extractProfile()
-    if (myProfile.images[0] === candidateWithData.imageData){
-        await goToCandidates()
-        return;
-    }
-    
-    // Once ivan has it, update the top photo
+export async function updateTopPhoto(candidate: ImageCandidate) {
+  const candidateWithData = await client.getImageData(candidate._id);
+  await goToMyProfile();
+  const myProfile = await extractProfile();
+  if (myProfile.images[0] === candidateWithData.imageData) {
+    await goToCandidates();
+    return;
+  }
 
+  // Once ivan has it, update the top photo
 }
 
 export async function mainThread(options: {
@@ -100,7 +94,7 @@ export async function mainThread(options: {
         return;
       }
     }
-    await delay(options.waitBetweenRoundsSeconds * 1000);
+    await sleep(options.waitBetweenRoundsSeconds * 1000);
     await considerProfileUpdates(options.userId);
   }
 }

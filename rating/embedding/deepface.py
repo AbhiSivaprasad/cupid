@@ -19,6 +19,13 @@ class ImageAnnotations:
     face_location: FaceLocation
 
 
+@dataclass
+class ImagesAnnotations:
+    embeddings: np.array
+    face_confidences: List[float]
+    face_locations: List[FaceLocation]
+
+
 def _process_model_output(model_output) -> ImageAnnotations:
     """
     Process the result of a model API call from a single image
@@ -53,11 +60,11 @@ def _process_model_output(model_output) -> ImageAnnotations:
     return ImageAnnotations(
         embedding=embedding,
         face_confidence=face_confidence,
-        face_location = face_location
+        face_location=face_location
     )
 
 
-def get_image_annotations(image_paths = List[str], model_name='VGG-Face'):
+def get_image_annotations(image_paths = List[str], model_name='VGG-Face') -> ImagesAnnotations:
     # throws error if no face found
     # TODO: batch represent call
     processed_model_results = []
@@ -65,4 +72,11 @@ def get_image_annotations(image_paths = List[str], model_name='VGG-Face'):
         model_output = DeepFace.represent(img_path=image_path, model_name=model_name)
         processed_model_output = _process_model_output(model_output)
         processed_model_results.append(processed_model_output)
-    return processed_model_results
+    
+    images_annotations = ImagesAnnotations(
+        embeddings=np.array([result.embedding for result in processed_model_results]),
+        face_confidences=[result.face_confidence for result in processed_model_results],
+        face_locations=[result.face_location for result in processed_model_results]
+    )
+
+    return images_annotations
