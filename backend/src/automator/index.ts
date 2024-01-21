@@ -9,19 +9,31 @@ import {
   WebElement,
 } from 'selenium-webdriver';
 import { Options } from 'selenium-webdriver/chrome';
-import { sleep } from './util';
+import { isNamespaceExport } from "typescript";
+import * as readlineSync from "readline-sync";
+import { sleep } from '../utils';
 
 const BROWSER_DATA_DIR_NAME = 'browser_data';
 const BROWSER_DATA_PATH = path.resolve(path.join('./', BROWSER_DATA_DIR_NAME));
+const TMP_DIR_NAME = "temp";
+
+try {
+  fs.mkdirSync(TMP_DIR_NAME);
+} catch(e) {
+}
 
 (async function example() {
   const driver = await getDriver();
-  try {
+
+  let profiles: CandidateProfile[] = [];
+
     await driver.get('https://tinder.com/app/recs');
     await sleep(5_000);
 
     while (true) {
       const profile = await extractAndReactToProfile(driver);
+      profiles.push(profile);
+      fs.writeFileSync("./profiles.json", JSON.stringify(profiles, null, 2));
       await printProfile(profile);
       await sleep(2000);
     }
@@ -29,9 +41,6 @@ const BROWSER_DATA_PATH = path.resolve(path.join('./', BROWSER_DATA_DIR_NAME));
     // await driver.findElement(By.name('q')).sendKeys('webdriver', Key.RETURN);
     // await driver.wait(until.titleIs('webdriver - Google Search'), 1000);
     await sleep(5000000);
-  } finally {
-    // await driver.quit();
-  }
 })();
 
 // Interact with Tinder App
@@ -85,7 +94,10 @@ export function getDriver(): Promise<WebDriver> {
 export interface CandidateProfile {
   name?: string;
   age?: string;
-  images: string[]; // base64 encoded jpgs
+  images: string[]; // base64 encoded pngs, only scanning the first one
+  liked?: boolean;
+
+  // everything below here not figured out yet
   job?: string;
   height?: string;
   education?: string;
@@ -214,12 +226,6 @@ export async function getDislikeButton(driver: WebDriver): Promise<WebElement> {
   throw new Error('unable to find dislike button');
 }
 
-export async function likeOrDislike(like: true): Promise<void> {
-  if (like) {
-  } else {
-  }
-}
-
 export async function extractAndReactToProfile(
   driver: WebDriver,
 ): Promise<CandidateProfile> {
@@ -229,7 +235,7 @@ export async function extractAndReactToProfile(
     const images = await getCurrentProfileImages(driver);
     profile.images = images;
   } catch (e) {
-    // console.log("failed to get profile images", e);
+    console.log("failed to get profile images", e);
   }
 
   const moreInfoButton = await getExpandButton(driver);
@@ -253,9 +259,9 @@ export async function extractAndReactToProfile(
   try {
     const secondProfileElement = await getSecondProfileInfoContainer(driver);
     const secondProfileText = await secondProfileElement.getText();
-    console.log('******');
-    console.log(secondProfileText);
-    console.log('******');
+    // console.log("******");
+    // console.log(secondProfileText);
+    // console.log("******");
   } catch (e) {
     // console.log("failed to get second profile element", e);
   }
@@ -263,7 +269,17 @@ export async function extractAndReactToProfile(
   try {
     const likeButton = await getLikeButton(driver);
     const dislikeButton = await getDislikeButton(driver);
-    await clickOnElement(driver, likeButton);
+    const like = readlineSync.question(`like? `);
+
+    if (like === "y") {
+      console.log("liking");
+      profile.liked = true;
+      await clickOnElement(driver, likeButton);
+    } else {
+      console.log("disliking");
+      profile.liked = false;
+      await clickOnElement(driver, dislikeButton);
+    }
   } catch (e) {
     // console.log("failed to click on the dislike button", e);
   }
@@ -272,8 +288,11 @@ export async function extractAndReactToProfile(
 }
 
 export async function printProfile(profile: CandidateProfile): Promise<void> {
-  console.log('name   : ', profile.name);
-  console.log('age    : ', profile.age);
-  console.log('desc   : ', profile.description);
-  console.log('images : ', profile.images.length);
+  console.log("-----------");
+  console.log("name   : ", profile.name);
+  console.log("age    : ", profile.age);
+  console.log("desc   : ", profile.description);
+  console.log("images : ", profile.images.length);
+  console.log("liked  : ", profile.liked);
+  console.log("-----------");
 }
