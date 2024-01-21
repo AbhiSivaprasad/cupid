@@ -36,6 +36,7 @@ try {
     fs.writeFileSync("./profiles.json", JSON.stringify(profiles, null, 2));
     await printProfile(profile);
     await sleep(2000);
+    console.log("dataset size", profiles.length);
   }
 
   // await driver.findElement(By.name('q')).sendKeys('webdriver', Key.RETURN);
