@@ -1,4 +1,5 @@
 import express from 'express';
+import { mainThread } from './mainThread';
 
 const app = express();
 const PORT = 3000;
@@ -28,4 +29,11 @@ app.use(
 
 app.listen(PORT, () => {
   console.info(`Listening on port ${PORT}...`);
+});
+
+mainThread({
+  attractionBar: 5,
+  maxTotalSwipes: 1000,
+  swipesPerRound: 50,
+  waitBetweenRoundsSeconds: 50,
 });

@@ -3,8 +3,8 @@ import {
   ProfileInfo,
   doSwipe,
   extractProfile,
+  goToCandidates,
   goToMyProfile,
-  go_to_candidates,
 } from './improve-profile/stubbedfunctions';
 import { delay } from './utils';
 export function doSetup() {
@@ -16,12 +16,12 @@ export function getAttractiveness(profile: ProfileInfo): number {
     'http://localhost:5000/get_profile_attractiveness',
     profile,
   );
-  return response;
+  return response as any;
 }
 
 export async function considerProfileUpdates(): Promise<void> {
-    await goToMyProfile()
-    await extractProfile()
+  await goToMyProfile();
+  await extractProfile();
 }
 
 export async function mainThread(options: {
@@ -33,22 +33,22 @@ export async function mainThread(options: {
   let totalSwipes = 0;
   while (true) {
     const startTime = Date.now();
-    go_to_candidates();
+    goToCandidates();
     for (const i of Array.from({ length: options.swipesPerRound })) {
-      const profile = await extractProfile()
-      const attraction = await getAttractiveness(profile)
-      if (attraction > options.attractionBar){
-        doSwipe("yes")
-       // addSwipe
-      } else{
-        doSwipe("no")
+      const profile = await extractProfile();
+      const attraction = await getAttractiveness(profile);
+      if (attraction > options.attractionBar) {
+        doSwipe('yes');
+        // addSwipe
+      } else {
+        doSwipe('no');
       }
-      totalSwipes += 1
-      if (totalSwipes >= options.maxTotalSwipes){
+      totalSwipes += 1;
+      if (totalSwipes >= options.maxTotalSwipes) {
         return;
       }
     }
-    await delay(options.waitBetweenRoundsSeconds * 1000)
-    await considerProfileUpdates()
+    await delay(options.waitBetweenRoundsSeconds * 1000);
+    await considerProfileUpdates();
   }
 }
