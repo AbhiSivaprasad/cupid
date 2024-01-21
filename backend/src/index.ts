@@ -48,6 +48,6 @@ const DUMMY_THEM: Profile = {
     await sleep(2000);
 
     // TODO(shaya)
-    // await considerProfileUpdates(profile as any);
+    await considerProfileUpdates(profile as any);
   }
 })();

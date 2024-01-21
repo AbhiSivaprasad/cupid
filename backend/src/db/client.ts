@@ -2,7 +2,7 @@ import { MongoClient, ObjectId } from 'mongodb';
 
 export interface ImageCandidate {
   _id: string;
-  embedding: string;
+  embedding: number[];
   swipesWithImage: number;
   matchesWithImage: number;
 }
@@ -71,11 +71,11 @@ class TinderMongoClient {
     });
   }
 
-  async getImageCandidateEmbeddings(): Promise<ImageCandidate[]> {
+  async getImageCandidateEmbeddings(userId: string): Promise<ImageCandidate[]> {
     const imageCandidatesCollection = this.db.collection('image_candidates');
     return await imageCandidatesCollection
       .find(
-        {},
+        {userId: userId},
         { projection: { _id: 1, embedding: 1, score: 1, swipesWithImage: 1 } },
       )
       .toArray();
