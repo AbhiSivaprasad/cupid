@@ -125,18 +125,12 @@ export async function getSecondProfileInfoContainer(
 }
 
 export async function getCurrentProfileImages(driver: WebDriver) {
-  const slider = await driver.findElement(By.css(".keen-slider__slide"));
+  const slider = await driver.findElement(By.css(".keen-slider"));
   const children = await slider.findElements(By.css("*"));
 
   const screenshot = await children[0].takeScreenshot();
-
-  fs.writeFileSync("./temp/encoded.txt", screenshot);
-
-  console.log(screenshot);
-
-  console.log("IMAGE GETTING");
-  console.log(slider);
-  console.log(children);
+  await clickOnElement(driver, children[0]);
+  fs.writeFileSync(`./temp/encoded.txt`, screenshot);
 }
 
 export async function clickOnElement(
@@ -154,6 +148,8 @@ export async function extractCurrentProfile(
   } catch (e) {
     console.log("failed to get profile images", e);
   }
+
+  process.exit(0);
 
   const moreInfoButton = await getExpandButton(driver);
   await clickOnElement(driver, moreInfoButton);
