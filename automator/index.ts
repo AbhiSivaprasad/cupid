@@ -112,6 +112,15 @@ export async function getFirstProfileInfoContainer(
   return info;
 }
 
+export async function extractInfoFromFirstContainer(
+  driver: WebDriver,
+  firstContainer: WebElement
+): Promise<{ name: string; age: string }> {
+  console.log(firstContainer);
+
+  return { name: "test name", age: "69" };
+}
+
 export async function getSecondProfileInfoContainer(
   driver: WebDriver
 ): Promise<WebElement> {
@@ -160,10 +169,8 @@ export async function extractCurrentProfile(
     const images = await getCurrentProfileImages(driver);
     profile.images = images;
   } catch (e) {
-    console.log("failed to get profile images", e);
+    // console.log("failed to get profile images", e);
   }
-
-  // process.exit(0);
 
   const moreInfoButton = await getExpandButton(driver);
   await clickOnElement(driver, moreInfoButton);
@@ -172,12 +179,14 @@ export async function extractCurrentProfile(
 
   try {
     const firstProfileElement = await getFirstProfileInfoContainer(driver);
-    const firstProfileText = await firstProfileElement.getText();
-    console.log("******");
-    console.log(firstProfileText);
-    console.log("******");
+    const firstProfileInfo = await extractInfoFromFirstContainer(
+      driver,
+      firstProfileElement
+    );
+    profile.name = firstProfileInfo.name;
+    profile.age = firstProfileInfo.age;
   } catch (e) {
-    console.log("failed to get first profile element", e);
+    // console.log("failed to get first profile element", e);
   }
   console.log("");
 
@@ -188,7 +197,7 @@ export async function extractCurrentProfile(
     console.log(secondProfileText);
     console.log("******");
   } catch (e) {
-    console.log("failed to get second profile element", e);
+    // console.log("failed to get second profile element", e);
   }
 
   return profile as CandidateProfile;
