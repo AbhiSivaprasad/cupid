@@ -1,3 +1,3 @@
-export const delay = async (ms: number) => {
-    await setTimeout(() => {}, ms)
-}
+export const sleep = async (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};

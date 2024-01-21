@@ -6,6 +6,7 @@ import {
   goToMyProfile,
   goToCandidates,
 } from './improve-profile/stubbedfunctions';
+<<<<<<< HEAD
 import { delay } from './utils';
 import { MongoClient, MongoClient } from 'mongodb';
 import TinderMongoClient, { ImageCandidate } from './db/client';
@@ -15,6 +16,9 @@ const client = new TinderMongoClient(
   'mongodb+srv://hingebot.nuxwjjl.mongodb.net/',
   'prod',
 );
+=======
+import { sleep } from './utils';
+>>>>>>> 81ab8c31fde8ca82eeeb3f06f18e65b9dd290fc6
 export function doSetup() {
   // add all the setup you need here so that all of the functions in stubbedFunctions are fully callable.
 }

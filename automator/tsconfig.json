@@ -1,9 +1,0 @@
-{
-  "include": ["**/*.ts", "**/*.d.ts"],
-  "exclude": ["node_modules", "build"],
-  "compilerOptions": {
-    "noEmit": true,
-    "target": "ES2022",
-    "module": "commonjs",
-  }
-}
