@@ -48,7 +48,7 @@ const BROWSER_DATA_PATH = path.resolve(path.join("./", BROWSER_DATA_DIR_NAME));
     // await driver.wait(until.titleIs('webdriver - Google Search'), 1000);
     await sleep(5000000);
   } finally {
-    await driver.quit();
+    // await driver.quit();
   }
 })();
 
@@ -95,55 +95,55 @@ export interface CandidateProfile {
 }
 
 export async function getExpandButton(driver: WebDriver): Promise<WebElement> {
-  const MORE_INFO_SVG =
-    "M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z";
-  const buttons = await driver.findElements(By.css("button"));
-
   const expand = await driver.findElement(
     By.css(".D\\(f\\).Ai\\(c\\).Miw\\(0\\)")
   );
 
   return expand;
+}
 
-  for (const button of buttons) {
-    try {
-      const svg = await button.findElement(By.css("svg"));
-      const path = await button.findElement(By.css("svg path"));
-      const d = await path.getAttribute("d");
+export async function getFirstProfileInfoContainer(
+  driver: WebDriver
+): Promise<WebElement> {
+  const info = await driver.findElement(
+    By.css(".D\\(f\\).Jc\\(sb\\).Us\\(n\\).Px\\(16px\\).Py\\(10px\\)")
+  );
 
-      console.log("d " + d);
+  return info;
+}
 
-      if (d === MORE_INFO_SVG) {
-        const parent = await driver.executeScript(
-          "return arguments[0].parentNode",
-          button
-        );
-        console.log("parent", parent);
-        return parent as WebElement;
-      }
-    } catch (e) {}
-  }
+export async function getSecondProfileInfoContainer(
+  driver: WebDriver
+): Promise<WebElement> {
+  const info = await driver.findElement(
+    By.css(
+      ".Px\\(16px\\).Py\\(12px\\).Us\\(t\\).C\\(\\$c-ds-text-secondary\\).BreakWord.Whs\\(pl\\).Typs\\(body-1-regular\\)"
+    )
+  );
 
-  throw new Error("unable to find more info button");
+  return info;
+}
+
+export async function clickOnElement(
+  driver: WebDriver,
+  element: WebElement
+): Promise<void> {
+  await driver.executeScript("return arguments[0].click()", element);
 }
 
 export async function extractCurrentProfile(
   driver: WebDriver
 ): Promise<CandidateProfile> {
   const moreInfoButton = await getExpandButton(driver);
-  console.log("\n\n***\n\n");
-  console.log("found more info button", await moreInfoButton.getTagName());
-  console.log(moreInfoButton);
+  await clickOnElement(driver, moreInfoButton);
 
-  await driver.executeScript("return arguments[0].click()", moreInfoButton);
+  const firstProfileElement = await getFirstProfileInfoContainer(driver);
+  const firstProfileText = await firstProfileElement.getText();
+  console.log(firstProfileText);
 
-  // await moreInfoButton.click();
-  // const location = await moreInfoButton.getRect();
-  // const size = await moreInfoButton.getSize();
-  // const clickLocation = {
-  //   x: location.x + size.width / 2,
-  //   y: location.y + size.height / 2,
-  // };
+  const secondProfileElement = await getSecondProfileInfoContainer(driver);
+  const secondProfileText = await secondProfileElement.getText();
+  console.log(secondProfileText);
 
   return {
     images: [],
