@@ -3,8 +3,8 @@ import {
   ProfileInfo,
   doSwipe,
   extractProfile,
-  goToCandidates,
   goToMyProfile,
+  goToCandidates,
 } from './improve-profile/stubbedfunctions';
 import { delay } from './utils';
 export function doSetup() {
@@ -19,6 +19,7 @@ export function getAttractiveness(profile: ProfileInfo): number {
   return response as any;
 }
 
+// For now, we will only consider updating the first image in the profile.
 export async function considerProfileUpdates(): Promise<void> {
   await goToMyProfile();
   await extractProfile();
