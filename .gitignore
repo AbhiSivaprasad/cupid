@@ -1,3 +1,6 @@
+.env
+node_modules
+#
 # image file types
 *.jpg
 *.jpeg
@@ -6,3 +9,5 @@
 # python env
 **/.venv/
 **/__pycache__/
+
+
