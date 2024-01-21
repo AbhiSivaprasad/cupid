@@ -117,8 +117,6 @@ export async function extractInfoFromFirstContainer(
   driver: WebDriver,
   firstContainer: WebElement
 ): Promise<{ name: string; age: string }> {
-  console.log(firstContainer);
-
   let name = "unknown";
   let age = "unknown";
 
@@ -178,6 +176,35 @@ export async function clickOnElement(
   await driver.executeScript("return arguments[0].click()", element);
 }
 
+export async function getLikeButton(driver: WebDriver): Promise<WebElement> {
+  return null;
+}
+
+export async function getDislikeButton(driver: WebDriver): Promise<WebElement> {
+  const buttons = await driver.findElements(By.css("button"));
+
+  for (const button of buttons) {
+    try {
+      const path = await button.findElement(By.css("span span svg path"));
+      const d = await path.getAttribute("d");
+      if (
+        d ===
+        "m15.44 12 4.768 4.708c1.056.977 1.056 2.441 0 3.499-.813 1.057-2.438 1.057-3.413 0L12 15.52l-4.713 4.605c-.975 1.058-2.438 1.058-3.495 0-1.056-.813-1.056-2.44 0-3.417L8.47 12 3.874 7.271c-1.138-.976-1.138-2.44 0-3.417a1.973 1.973 0 0 1 3.25 0L12 8.421l4.713-4.567c.975-1.139 2.438-1.139 3.413 0 1.057.814 1.057 2.44 0 3.417L15.44 12Z"
+      ) {
+        return button;
+      }
+    } catch (e) {}
+  }
+
+  throw new Error("unable to find dislike button");
+}
+
+export async function likeOrDislike(like: true): Promise<void> {
+  if (like) {
+  } else {
+  }
+}
+
 export async function extractCurrentProfile(
   driver: WebDriver
 ): Promise<CandidateProfile> {
@@ -216,6 +243,13 @@ export async function extractCurrentProfile(
     console.log("******");
   } catch (e) {
     // console.log("failed to get second profile element", e);
+  }
+
+  try {
+    const dislikeButton = await getDislikeButton(driver);
+    await clickOnElement(driver, dislikeButton);
+  } catch (e) {
+    // console.log("failed to click on the dislike button", e);
   }
 
   return profile as CandidateProfile;
