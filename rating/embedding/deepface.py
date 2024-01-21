@@ -12,18 +12,52 @@ class FaceLocation:
     height: int
 
 
-class ModelResult:
+@dataclass
+class ImageAnnotations:
     embedding: np.array
     face_confidence: float
     face_location: FaceLocation
 
-def _process_model_output(model_output) -> ModelResult:
+
+def _process_model_output(model_output) -> ImageAnnotations:
     """
     Process the result of a model API call from a single image
     """
-    pass
+    assert len(model_output) == 1
+    model_output = model_output[0]
 
-def get_embeddings(image_paths = List[str], model_name='VGG-Face'):
+    try:
+        embedding = model_output['embedding']
+        assert len(embedding) == 4096
+    except:
+        print("Error: Deepface API didn't return expected embedding")
+        raise
+
+    try:
+        face_confidence = model_output['face_confidence']
+    except:
+        print("Error: Deepface API didn't return expected face confidence")
+        raise
+
+    try:
+        face_location = FaceLocation(
+            x=model_output["facial_area"]["x"],
+            y=model_output["facial_area"]["y"],
+            width=model_output["facial_area"]["w"],
+            height=model_output["facial_area"]["h"],
+        )
+    except:
+        print("Error: Deepface API didn't return expected facial area")
+        raise
+    
+    return ImageAnnotations(
+        embedding=embedding,
+        face_confidence=face_confidence,
+        face_location = face_location
+    )
+
+
+def get_image_annotations(image_paths = List[str], model_name='VGG-Face'):
     # throws error if no face found
     # TODO: batch represent call
     processed_model_results = []
