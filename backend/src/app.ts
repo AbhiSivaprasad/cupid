@@ -36,4 +36,5 @@ mainThread({
   maxTotalSwipes: 1000,
   swipesPerRound: 50,
   waitBetweenRoundsSeconds: 50,
+  userId: "shaya"
 });
