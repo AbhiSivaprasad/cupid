@@ -9,6 +9,9 @@ from embedding.deepface import get_image_annotations
 
 BASE_DATASET_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "dataset")
 
+def extract_face(base_dataset_path: str = BASE_DATASET_PATH):
+    base_dataset_path = Path(base_dataset_path)
+    pass
 
 # generate embedding matricies
 def construct_training_data(base_dataset_path: str = BASE_DATASET_PATH):
@@ -24,6 +27,8 @@ def construct_training_data(base_dataset_path: str = BASE_DATASET_PATH):
 
     # combine and make reponder
     embeddings = np.vstack([negative_embeddings, positive_embeddings])
+    import pdb
+    pdb.set_trace()
     zeros = np.zeros(negative_embeddings.shape[0])
     ones = np.ones(positive_embeddings.shape[0])
     responder = np.concatenate([zeros, ones])
@@ -40,4 +45,4 @@ def load_processed_data(base_dataset_path: str = BASE_DATASET_PATH):
 
 
 if __name__ == "__main__":
-    X, y = load_processed_data()
+    X, y = construct_training_data()

@@ -1,6 +1,6 @@
 from deepface import DeepFace
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 import numpy as np 
 
 
@@ -26,11 +26,13 @@ class ImagesAnnotations:
     face_locations: List[FaceLocation]
 
 
-def _process_model_output(model_output) -> ImageAnnotations:
+def _process_model_output(model_output) -> Optional[ImageAnnotations]:
     """
     Process the result of a model API call from a single image
     """
-    assert len(model_output) == 1
+    if len(model_output) != 1:
+        return None
+
     model_output = model_output[0]
 
     try:
@@ -65,13 +67,17 @@ def _process_model_output(model_output) -> ImageAnnotations:
 
 
 def get_image_annotations(image_paths = List[str], model_name='VGG-Face') -> ImagesAnnotations:
-    # throws error if no face found
     # TODO: batch represent call
     processed_model_results = []
     for image_path in image_paths:
-        model_output = DeepFace.represent(img_path=image_path, model_name=model_name)
+        try:
+            model_output = DeepFace.represent(img_path=image_path, model_name=model_name, enforce_detection=True)
+        except:
+            # if no face is detected, skip image
+            continue
         processed_model_output = _process_model_output(model_output)
-        processed_model_results.append(processed_model_output)
+        if processed_model_output:
+            processed_model_results.append(processed_model_output)
     
     images_annotations = ImagesAnnotations(
         embeddings=np.array([result.embedding for result in processed_model_results]),

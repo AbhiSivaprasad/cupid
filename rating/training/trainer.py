@@ -26,6 +26,14 @@ class Classifier(nn.Module):
 
 def load_and_setup_dataset():
     X, y = load_processed_data()
+     # Reporting metrics about the dataset
+    print(f"Total samples in dataset: {X.shape[0]}")
+    print(f"Number of features per sample: {X.shape[1]}")
+    if y.ndim == 1:
+        print(f"Number of classes: {np.unique(y).size}")
+        print(f"Sample distribution per class: {np.bincount(y)}")
+    else:
+        print("y does not appear to be a 1-dimensional array of labels.")
 
     # Convert numpy arrays to PyTorch tensors
     tensor_embeddings = torch.Tensor(X)
@@ -76,5 +84,5 @@ def evaluate(model, dataloader):
 if __name__ == '__main__':
     model = Classifier()
     dataloader = load_and_setup_dataset()
-    train(model, dataloader, epochs=10)
+    train(model, dataloader, epochs=32)
     # evaluate(model, dataloader)
