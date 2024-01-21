@@ -1,5 +1,5 @@
 import { GPT } from './GPT';
-import { constructPrompt } from './prompt';
+import { SYSTEM_PROMPT, constructPrompt } from './prompt';
 import { Message, Profile } from './types';
 
 export function getMessage(
@@ -14,5 +14,5 @@ export function getMessage(
   }
 
   const gpt = new GPT('gpt-4-1106-preview');
-  return gpt.complete(prompt, 300);
+  return gpt.complete(prompt, SYSTEM_PROMPT, 300);
 }

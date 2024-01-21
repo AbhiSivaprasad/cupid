@@ -1,2 +1,5 @@
 node_modules
 browser_data
+temp
+.DS_Store
+profiles.json

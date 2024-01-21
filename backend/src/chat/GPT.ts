@@ -19,10 +19,15 @@ export class GPT {
 
   async complete(
     message: string,
-    maxTokensToSample: number = 550,
+    systemMessage: string,
+    maxTokensToSample: number = 500,
   ): Promise<string> {
     const completion = await this.client.chat.completions.create({
       messages: [
+        {
+          role: 'system',
+          content: systemMessage,
+        },
         {
           role: 'user',
           content: message,
@@ -30,6 +35,38 @@ export class GPT {
       ],
       max_tokens: maxTokensToSample,
       model: this.model,
+      stream: false,
+    });
+    return completion.choices[0].message.content ?? '';
+  }
+
+  async transcribeImages(
+    images: string[], // base64 encoded images
+    maxTokensToSample: number = 300,
+  ): Promise<string> {
+    const completion = await this.client.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Transcribe the following images:',
+            },
+            ...images.map(
+              (image) =>
+                ({
+                  type: 'image_url',
+                  image_url: {
+                    url: image,
+                  },
+                } as const),
+            ),
+          ],
+        },
+      ],
+      max_tokens: maxTokensToSample,
+      model: 'gpt-4-vision-preview',
       stream: false,
     });
     return completion.choices[0].message.content ?? '';
