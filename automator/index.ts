@@ -42,7 +42,7 @@ const BROWSER_DATA_PATH = path.resolve(path.join("./", BROWSER_DATA_DIR_NAME));
 
     await sleep(5_000);
     const profile = await extractCurrentProfile(driver);
-    console.log(`got profile: ${JSON.stringify(profile, null, 2)}`);
+    await printProfile(profile);
 
     // await driver.findElement(By.name('q')).sendKeys('webdriver', Key.RETURN);
     // await driver.wait(until.titleIs('webdriver - Google Search'), 1000);
@@ -124,13 +124,24 @@ export async function getSecondProfileInfoContainer(
   return info;
 }
 
-export async function getCurrentProfileImages(driver: WebDriver) {
+/**
+ * Returns an array of base64 encoded png images from the current profile.
+ *
+ * currently only returns first image.
+ *
+ * @todo: make it return other images too.
+ */
+export async function getCurrentProfileImages(
+  driver: WebDriver
+): Promise<string[]> {
   const slider = await driver.findElement(By.css(".keen-slider"));
   const children = await slider.findElements(By.css("*"));
 
+  // await clickOnElement(driver, children[0]);
   const screenshot = await children[0].takeScreenshot();
-  await clickOnElement(driver, children[0]);
   fs.writeFileSync(`./temp/encoded.txt`, screenshot);
+
+  return [screenshot];
 }
 
 export async function clickOnElement(
@@ -143,13 +154,16 @@ export async function clickOnElement(
 export async function extractCurrentProfile(
   driver: WebDriver
 ): Promise<CandidateProfile> {
+  const profile: Partial<CandidateProfile> = {};
+
   try {
     const images = await getCurrentProfileImages(driver);
+    profile.images = images;
   } catch (e) {
     console.log("failed to get profile images", e);
   }
 
-  process.exit(0);
+  // process.exit(0);
 
   const moreInfoButton = await getExpandButton(driver);
   await clickOnElement(driver, moreInfoButton);
@@ -177,7 +191,12 @@ export async function extractCurrentProfile(
     console.log("failed to get second profile element", e);
   }
 
-  return {
-    images: [],
-  };
+  return profile as CandidateProfile;
+}
+
+export async function printProfile(profile: CandidateProfile): Promise<void> {
+  console.log("name   : ", profile.name);
+  console.log("age    : ", profile.age);
+  console.log("desc   : ", profile.description);
+  console.log("images : ", profile.images.length);
 }
