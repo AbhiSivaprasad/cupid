@@ -46,7 +46,7 @@ def train(model, dataloader, epochs=10):
         for i, (inputs, labels) in enumerate(dataloader):
             optimizer.zero_grad()
             outputs = model(inputs)
-            loss = criterion(outputs, labels)
+            loss = criterion(outputs.squeeze(), labels)
             loss.backward()
             optimizer.step()
 
@@ -77,4 +77,4 @@ if __name__ == '__main__':
     model = Classifier()
     dataloader = load_and_setup_dataset()
     train(model, dataloader, epochs=10)
-    evaluate(model, dataloader)
+    # evaluate(model, dataloader)
