@@ -1,45 +1,80 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.model_selection import train_test_split
+from torch.utils.data import TensorDataset, DataLoader
+import numpy as np
+from torch.utils.tensorboard import SummaryWriter
+import matplotlib.pyplot as plt
 
-# Assuming 'embeddings' is your np.array of shape (4096, samples)
-# and 'labels' is your array of 0s and 1s
+import sys
+sys.path.append("/Users/abhisivaprasad/Documents/projects/cupid/rating/")
+from data.process_data import load_processed_data
 
-# Convert numpy arrays to PyTorch tensors
-X = torch.tensor(embeddings.T, dtype=torch.float32)  # Transpose to make it (samples, 4096)
-y = torch.tensor(labels, dtype=torch.float32)
 
-# Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
+class Classifier(nn.Module):
+    def __init__(self):
+        super(Classifier, self).__init__()
+        self.fc1 = nn.Linear(4096, 512)  # First fully connected layer
+        self.relu = nn.ReLU()            # ReLU activation
+        self.fc2 = nn.Linear(512, 1)     # Second fully connected layer
 
-# Define the model
-class SimpleClassifier(nn.Module):
-    def __init__(self, input_size):
-        super(SimpleClassifier, self).__init__()
-        self.fc = nn.Linear(input_size, 1)
-    
     def forward(self, x):
-        return torch.sigmoid(self.fc(x))
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        return torch.sigmoid(x)
 
-model = SimpleClassifier(input_size=4096)
+def load_and_setup_dataset():
+    X, y = load_processed_data()
 
-# Loss and optimizer
-criterion = nn.BCELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+    # Convert numpy arrays to PyTorch tensors
+    tensor_embeddings = torch.Tensor(X)
+    tensor_responses = torch.Tensor(y).squeeze()
 
-# Training loop
-for epoch in range(num_epochs):
-    # Forward pass
-    outputs = model(X_train)
-    loss = criterion(outputs, y_train)
+    # Create TensorDataset and DataLoader
+    dataset = TensorDataset(tensor_embeddings, tensor_responses)
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
-    # Backward and optimize
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+    return dataloader
 
-    # Validation and other code for monitoring performance...
+def train(model, dataloader, epochs=10):
+    criterion = nn.BCELoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    writer = SummaryWriter()  # TensorBoard writer
 
-# Evaluate the model
-# ...
+    for epoch in range(epochs):
+        for i, (inputs, labels) in enumerate(dataloader):
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            if i % 10 == 0:
+                print(f"Epoch {epoch+1}/{epochs}, Step {i+1}/{len(dataloader)}, Loss: {loss.item()}")
+                writer.add_scalar('training loss', loss.item(), epoch * len(dataloader) + i)
+    
+    writer.close()
+
+def evaluate(model, dataloader):
+    model.eval()
+    correct = 0
+    total = 0
+
+    with torch.no_grad():
+        for inputs, labels in dataloader:
+            outputs = model(inputs)
+            predicted = (outputs > 0.5).float()
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    accuracy = 100 * correct / total
+    print(f'Accuracy: {accuracy}%')
+    return accuracy
+
+
+if __name__ == '__main__':
+    model = Classifier()
+    dataloader = load_and_setup_dataset()
+    train(model, dataloader, epochs=10)
+    evaluate(model, dataloader)

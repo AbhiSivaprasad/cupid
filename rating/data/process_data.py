@@ -32,6 +32,12 @@ def construct_training_data(base_dataset_path: str = BASE_DATASET_PATH):
     np.save(base_dataset_path / "processed" / "X.npy", embeddings)
     np.save(base_dataset_path / "processed" / "y.npy", responder)
 
+def load_processed_data(base_dataset_path: str = BASE_DATASET_PATH):
+    base_dataset_path = Path(base_dataset_path)
+    X = np.load(base_dataset_path / "processed" / "X.npy")
+    y = np.load(base_dataset_path / "processed" / "y.npy")
+    return X, y
+
 
 if __name__ == "__main__":
-    construct_training_data(BASE_DATASET_PATH)
+    X, y = load_processed_data()
