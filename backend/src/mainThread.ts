@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { randomNormal } from 'd3-random';
+import { CandidateProfile } from './automator';
 import TinderMongoClient, { ImageCandidate } from './db/client';
 import {
-  ProfileInfo,
   doSwipe,
   extractProfile,
   goToCandidates,
@@ -18,7 +18,7 @@ export function doSetup() {
   // add all the setup you need here so that all of the functions in stubbedFunctions are fully callable.
 }
 
-export function getAttractiveness(profile: ProfileInfo): number {
+export function getScore(profile: CandidateProfile): number {
   const response = axios.post(
     'http://localhost:5000/get_profile_attractiveness',
     profile,
@@ -82,7 +82,7 @@ export async function mainThread(options: {
     goToCandidates();
     for (const i of Array.from({ length: options.swipesPerRound })) {
       const profile = await extractProfile();
-      const attraction = await getAttractiveness(profile);
+      const attraction = await getScore(profile);
       if (attraction > options.attractionBar) {
         doSwipe('yes');
         // addSwipe
