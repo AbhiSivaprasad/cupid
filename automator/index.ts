@@ -40,10 +40,13 @@ const BROWSER_DATA_PATH = path.resolve(path.join("./", BROWSER_DATA_DIR_NAME));
 
   try {
     await driver.get("https://tinder.com/app/recs");
-
     await sleep(5_000);
-    const profile = await extractCurrentProfile(driver);
-    await printProfile(profile);
+
+    while (true) {
+      const profile = await extractAndReactToProfile(driver);
+      await printProfile(profile);
+      await sleep(2000);
+    }
 
     // await driver.findElement(By.name('q')).sendKeys('webdriver', Key.RETURN);
     // await driver.wait(until.titleIs('webdriver - Google Search'), 1000);
@@ -220,7 +223,7 @@ export async function likeOrDislike(like: true): Promise<void> {
   }
 }
 
-export async function extractCurrentProfile(
+export async function extractAndReactToProfile(
   driver: WebDriver
 ): Promise<CandidateProfile> {
   const profile: Partial<CandidateProfile> = {};
