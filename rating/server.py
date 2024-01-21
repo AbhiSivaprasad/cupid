@@ -57,14 +57,16 @@ def image_embedding():
 @app.route('/facialRating', methods=['POST'])
 def facial_rating():
     data = request.json
-    id = uuid.uuid4()
+    image = decode_image(data)
+    embedding = get_image_embedding(image)
+    # id = uuid.uuid4()
     
-    # write image to dir
-    image_path = Path(f"./data/images/{id}")
-    decode_image_and_convert_to_jpeg(data['image'], image_path)
+    # # write image to dir
+    # image_path = Path(f"./data/images/{id}")
+    # decode_image_and_convert_to_jpeg(data['image'], image_path)
 
     # get rating for an image
-    output = eval(model, image_path)
+    output = eval(model, embedding)
     return output
 
 @app.route('/ratingPrediction', methods=['POST'])

@@ -16,13 +16,13 @@ def load_model():
     return model
 
 
-def eval(model, image_path: str):
+def eval(model, embedding):
     """
     load an image and eval a model
     """
     # embed image
-    image_annotations = get_image_annotations(image_path)
-    embedding = image_annotations.embeddings
+    # image_annotations = get_image_annotations(image_path)
+    # embedding = image_annotations.embeddings
     embedding_tensor = torch.tensor(embedding).unsqueeze(0)
     output = model(embedding_tensor)
     return output
