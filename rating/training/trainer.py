@@ -93,9 +93,9 @@ def evaluate(model, dataloader):
 
 
 if __name__ == '__main__':
-    X, y = load_processed_data()
     model = Classifier()
     train_dataloader, test_dataloader = load_and_setup_dataset()
     train(model, train_dataloader, epochs=32)
     evaluate(model, train_dataloader)
     evaluate(model, test_dataloader)
+    torch.save(model, '/Users/abhisivaprasad/Documents/projects/cupid/rating/training/models/prod.pth')

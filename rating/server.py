@@ -1,3 +1,7 @@
+import uuid
+from pathlib import Path
+import torch
+from PIL import Image
 from flask import Flask, request, jsonify
 import numpy as np
 import base64
@@ -6,8 +10,24 @@ from PIL import Image
 from deepface import DeepFace
 from collections import Counter
 import random
+from training.trainer import Classifier
+from training.eval import eval
 
 app = Flask(__name__)
+
+def decode_image_and_convert_to_jpeg(base64_image, jpg_path):
+    # Decode the base64 image
+    image_data = base64.b64decode(base64_image)
+    
+    # Open the image
+    image = Image.open(BytesIO(image_data))
+
+    # Convert the image to RGB mode if it's not (to avoid issues with RGBA in JPEG)
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
+
+    # Save the image as a JPEG
+    image.save(jpg_path, 'JPEG')
 
 def decode_image(base64_image):
     # Decode the base64 image
@@ -34,9 +54,18 @@ def image_embedding():
 
 
 @app.route('/facialRating', methods=['POST'])
-def facial_rating(picture):
+def facial_rating():
     data = request.json
-    return random.randrange(0, 10)
+    id = uuid.uuid4()
+    
+    # write image to dir
+    image_path = Path(f"./data/images/{id}")
+    decode_image_and_convert_to_jpeg(data['image'], image_path)
+
+    # get rating for an image
+    output = eval(image_path)
+    return output
+
 @app.route('/ratingPrediction', methods=['POST'])
 def rating_prediction():
     data = request.json
