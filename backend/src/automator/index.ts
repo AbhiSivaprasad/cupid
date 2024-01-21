@@ -5,42 +5,41 @@ import {
   Builder,
   By,
   Capabilities,
+  Key,
   WebDriver,
   WebElement,
 } from 'selenium-webdriver';
 import { Options } from 'selenium-webdriver/chrome';
-import { isNamespaceExport } from "typescript";
-import * as readlineSync from "readline-sync";
 import { sleep } from '../utils';
 
 const BROWSER_DATA_DIR_NAME = 'browser_data';
 const BROWSER_DATA_PATH = path.resolve(path.join('./', BROWSER_DATA_DIR_NAME));
-const TMP_DIR_NAME = "temp";
+const TMP_DIR_NAME = 'temp';
 
 try {
   fs.mkdirSync(TMP_DIR_NAME);
-} catch(e) {
-}
+} catch (e) {}
 
 (async function example() {
   const driver = await getDriver();
 
   let profiles: CandidateProfile[] = [];
 
-    await driver.get('https://tinder.com/app/recs');
-    await sleep(5_000);
+  await driver.get('https://tinder.com/app/recs');
+  await sleep(5_000);
 
-    while (true) {
-      const profile = await extractAndReactToProfile(driver);
-      profiles.push(profile);
-      fs.writeFileSync("./profiles.json", JSON.stringify(profiles, null, 2));
-      await printProfile(profile);
-      await sleep(2000);
-    }
+  while (true) {
+    let profile = await extractProfile(driver);
+    profile = await reactToProfile(driver, profile, true);
+    profiles.push(profile);
+    fs.writeFileSync('./profiles.json', JSON.stringify(profiles, null, 2));
+    await printProfile(profile);
+    await sleep(2000);
+  }
 
-    // await driver.findElement(By.name('q')).sendKeys('webdriver', Key.RETURN);
-    // await driver.wait(until.titleIs('webdriver - Google Search'), 1000);
-    await sleep(5000000);
+  // await driver.findElement(By.name('q')).sendKeys('webdriver', Key.RETURN);
+  // await driver.wait(until.titleIs('webdriver - Google Search'), 1000);
+  await sleep(5000000);
 })();
 
 // Interact with Tinder App
@@ -161,6 +160,31 @@ export async function getSecondProfileInfoContainer(
   return info;
 }
 
+export async function getPhotosCount(driver: WebDriver): Promise<number> {
+  const scrollerContainerCandidates = await driver.findElements(
+    By.css('div.CenterAlign'),
+  );
+
+  let lastQuantity = 0;
+
+  for (const candidate of scrollerContainerCandidates) {
+    try {
+      const attr = await candidate.getAttribute('aria-label');
+      if (attr.includes("'s photos")) {
+        const buttons = await candidate.findElements(By.css('button.bullet'));
+        const quantity = buttons.length;
+        lastQuantity = quantity;
+      }
+    } catch (e) {}
+  }
+
+  if (lastQuantity === 0) {
+    throw new Error('unable to find photo quantity');
+  }
+
+  return lastQuantity;
+}
+
 /**
  * Returns an array of base64 encoded png images from the current profile.
  *
@@ -173,12 +197,18 @@ export async function getCurrentProfileImages(
 ): Promise<string[]> {
   const slider = await driver.findElement(By.css('.keen-slider'));
   const children = await slider.findElements(By.css('*'));
+  const screenshots: string[] = [];
+  const photosCount = await getPhotosCount(driver);
 
-  // await clickOnElement(driver, children[0]);
-  const screenshot = await children[0].takeScreenshot();
-  fs.writeFileSync(`./temp/encoded.txt`, screenshot);
+  for (let i = 0; i < photosCount; i++) {
+    const screenshot = await children[0].takeScreenshot();
+    fs.writeFileSync(`./temp/encoded_${i}.txt`, screenshot);
+    screenshots.push(screenshot);
+    await driver.actions().sendKeys(Key.SPACE).perform();
+    await sleep(250);
+  }
 
-  return [screenshot];
+  return screenshots;
 }
 
 export async function clickOnElement(
@@ -226,7 +256,7 @@ export async function getDislikeButton(driver: WebDriver): Promise<WebElement> {
   throw new Error('unable to find dislike button');
 }
 
-export async function extractAndReactToProfile(
+export async function extractProfile(
   driver: WebDriver,
 ): Promise<CandidateProfile> {
   const profile: Partial<CandidateProfile> = {};
@@ -235,7 +265,7 @@ export async function extractAndReactToProfile(
     const images = await getCurrentProfileImages(driver);
     profile.images = images;
   } catch (e) {
-    console.log("failed to get profile images", e);
+    console.log('failed to get profile images', e);
   }
 
   const moreInfoButton = await getExpandButton(driver);
@@ -266,33 +296,32 @@ export async function extractAndReactToProfile(
     // console.log("failed to get second profile element", e);
   }
 
-  try {
-    const likeButton = await getLikeButton(driver);
-    const dislikeButton = await getDislikeButton(driver);
-    const like = readlineSync.question(`like? `);
-
-    if (like === "y") {
-      console.log("liking");
-      profile.liked = true;
-      await clickOnElement(driver, likeButton);
-    } else {
-      console.log("disliking");
-      profile.liked = false;
-      await clickOnElement(driver, dislikeButton);
-    }
-  } catch (e) {
-    // console.log("failed to click on the dislike button", e);
-  }
-
   return profile as CandidateProfile;
 }
 
+export async function reactToProfile(
+  driver: WebDriver,
+  profile: CandidateProfile,
+  like: boolean,
+): Promise<CandidateProfile> {
+  profile.liked = like;
+  if (like) {
+    const likeButton = await getLikeButton(driver);
+    await clickOnElement(driver, likeButton);
+  } else {
+    const dislikeButton = await getDislikeButton(driver);
+    await clickOnElement(driver, dislikeButton);
+  }
+
+  return profile;
+}
+
 export async function printProfile(profile: CandidateProfile): Promise<void> {
-  console.log("-----------");
-  console.log("name   : ", profile.name);
-  console.log("age    : ", profile.age);
-  console.log("desc   : ", profile.description);
-  console.log("images : ", profile.images.length);
-  console.log("liked  : ", profile.liked);
-  console.log("-----------");
+  console.log('-----------');
+  console.log('name   : ', profile.name);
+  console.log('age    : ', profile.age);
+  console.log('desc   : ', profile.description);
+  console.log('images : ', profile.images.length);
+  console.log('liked  : ', profile.liked);
+  console.log('-----------');
 }

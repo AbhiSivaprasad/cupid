@@ -44,6 +44,10 @@ export class GPT {
     images: string[], // base64 encoded images
     maxTokensToSample: number = 300,
   ): Promise<string> {
+    if (images.length === 0) {
+      return '';
+    }
+
     const completion = await this.client.chat.completions.create({
       messages: [
         {
@@ -51,14 +55,14 @@ export class GPT {
           content: [
             {
               type: 'text',
-              text: 'Transcribe the following images:',
+              text: 'Transcribe the following images. It is important to list the important objects and activities happening within each, as well as any commonalities between the photos.',
             },
             ...images.map(
               (image) =>
                 ({
                   type: 'image_url',
                   image_url: {
-                    url: image,
+                    url: `data:image/png;base64,${image}`,
                   },
                 } as const),
             ),
