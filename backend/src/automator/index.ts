@@ -206,7 +206,7 @@ export async function getCurrentProfileImages(
     fs.writeFileSync(`./temp/encoded_${i}.txt`, screenshot);
     screenshots.push(screenshot);
     await driver.actions().sendKeys(Key.SPACE).perform();
-    await sleep(500);
+    await sleep(250);
   }
 
   return screenshots;
