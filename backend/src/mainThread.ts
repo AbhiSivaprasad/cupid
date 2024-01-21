@@ -20,7 +20,7 @@ export function doSetup() {
 
 export function getScore(profile: CandidateProfile): number {
   const response = axios.post(
-    'http://localhost:5000/get_profile_attractiveness',
+    'http://localhost:5000/ratingPrediction',
     profile,
   );
   return response as any;

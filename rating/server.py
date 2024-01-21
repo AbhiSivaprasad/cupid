@@ -21,6 +21,9 @@ def get_image_embedding(image):
 def get_rating_prediction(images):
     return np.random.randint(1, 6)
 
+def crop_array(arr, bbox):
+    arr[bbox['y']:bbox['y'] + bbox['h']][bbox['x']: bbox['x'] + bbox['w']]
+
 @app.route('/imageEmbedding', methods=['POST'])
 def image_embedding():
     data = request.json()
@@ -53,8 +56,8 @@ def rating_prediction():
             image_index_2, face_bbox_2, _ = info
             if image_index_1 == image_index_2:
                 continue
-            image_1 = imageArrays[image_index_1][face_bbox_1['y']:face_bbox_1['y'] + face_bbox_1['h']][face_bbox_1['x']:face_bbox_1['x']+face_bbox_1['w']]
-            image_2 = imageArrays[image_index_2][face_bbox_2['y']:face_bbox_2['y'] + face_bbox_2['h']][face_bbox_2['x']:face_bbox_2['x']+face_bbox_2['w']]
+            image_1 = crop_array(image_index_1, face_bbox_1)
+            image_2 = crop_array(image_index_2, face_bbox_2)
             if DeepFace.verify(image_1, image_2):
                 info[2] = face_index
             else:
@@ -68,7 +71,7 @@ def rating_prediction():
     print("MAX APPERAING", max_appearing_face)
     for image_index, face_bbox, face_number in flattenedFaces:
         if face_number == max_appearing_face:
-            prediction = facial_rating(imageArrays[image_index][face_bbox['y']:face_bbox['y'] + face_bbox['h']][face_bbox['x']:face_bbox['x']+face_bbox['w']])
+            prediction = facial_rating(crop_array(imageArrays[image_index], face_bbox))
             ratings.append(prediction)
     print("RATINGS ARE", ratings)
     return {'rating': (min(ratings) + sum(ratings) / len(ratings)) / 2}
