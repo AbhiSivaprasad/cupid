@@ -19,10 +19,15 @@ export class GPT {
 
   async complete(
     message: string,
+    systemMessage: string,
     maxTokensToSample: number = 550,
   ): Promise<string> {
     const completion = await this.client.chat.completions.create({
       messages: [
+        {
+          role: 'system',
+          content: systemMessage,
+        },
         {
           role: 'user',
           content: message,

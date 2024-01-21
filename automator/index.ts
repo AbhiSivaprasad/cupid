@@ -124,6 +124,21 @@ export async function getSecondProfileInfoContainer(
   return info;
 }
 
+export async function getCurrentProfileImages(driver: WebDriver) {
+  const slider = await driver.findElement(By.css(".keen-slider__slide"));
+  const children = await slider.findElements(By.css("*"));
+
+  const screenshot = await children[0].takeScreenshot();
+
+  fs.writeFileSync("./temp/encoded.txt", screenshot);
+
+  console.log(screenshot);
+
+  console.log("IMAGE GETTING");
+  console.log(slider);
+  console.log(children);
+}
+
 export async function clickOnElement(
   driver: WebDriver,
   element: WebElement
@@ -134,16 +149,37 @@ export async function clickOnElement(
 export async function extractCurrentProfile(
   driver: WebDriver
 ): Promise<CandidateProfile> {
+  try {
+    const images = await getCurrentProfileImages(driver);
+  } catch (e) {
+    console.log("failed to get profile images", e);
+  }
+
   const moreInfoButton = await getExpandButton(driver);
   await clickOnElement(driver, moreInfoButton);
 
-  const firstProfileElement = await getFirstProfileInfoContainer(driver);
-  const firstProfileText = await firstProfileElement.getText();
-  console.log(firstProfileText);
+  console.log("");
 
-  const secondProfileElement = await getSecondProfileInfoContainer(driver);
-  const secondProfileText = await secondProfileElement.getText();
-  console.log(secondProfileText);
+  try {
+    const firstProfileElement = await getFirstProfileInfoContainer(driver);
+    const firstProfileText = await firstProfileElement.getText();
+    console.log("******");
+    console.log(firstProfileText);
+    console.log("******");
+  } catch (e) {
+    console.log("failed to get first profile element", e);
+  }
+  console.log("");
+
+  try {
+    const secondProfileElement = await getSecondProfileInfoContainer(driver);
+    const secondProfileText = await secondProfileElement.getText();
+    console.log("******");
+    console.log(secondProfileText);
+    console.log("******");
+  } catch (e) {
+    console.log("failed to get second profile element", e);
+  }
 
   return {
     images: [],
