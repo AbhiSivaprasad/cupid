@@ -161,6 +161,31 @@ export async function getSecondProfileInfoContainer(
   return info;
 }
 
+export async function getPhotosCount(driver: WebDriver): Promise<number> {
+  const scrollerContainerCandidates = await driver.findElements(
+    By.css("div.CenterAlign")
+  );
+
+  let lastQuantity = 0;
+
+  for (const candidate of scrollerContainerCandidates) {
+    try {
+      const attr = await candidate.getAttribute("aria-label");
+      if (attr.includes("'s photos")) {
+        const buttons = await candidate.findElements(By.css("button.bullet"));
+        const quantity = buttons.length;
+        lastQuantity = quantity;
+      }
+    } catch (e) {}
+  }
+
+  if (lastQuantity === 0) {
+    throw new Error("unable to find photo quantity");
+  }
+
+  return lastQuantity;
+}
+
 /**
  * Returns an array of base64 encoded png images from the current profile.
  *
@@ -174,8 +199,9 @@ export async function getCurrentProfileImages(
   const slider = await driver.findElement(By.css(".keen-slider"));
   const children = await slider.findElements(By.css("*"));
   const screenshots: string[] = [];
+  const photosCount = await getPhotosCount(driver);
 
-  for (let i = 0; i < children.length; i++) {
+  for (let i = 0; i < photosCount; i++) {
     const screenshot = await children[0].takeScreenshot();
     fs.writeFileSync(`./temp/encoded_${i}.txt`, screenshot);
     screenshots.push(screenshot);
