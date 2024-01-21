@@ -15,4 +15,4 @@ temp
 **/__pycache__/
 
 
-profiles.json
+backend/profiles.json
