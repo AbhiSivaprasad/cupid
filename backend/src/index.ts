@@ -1,14 +1,7 @@
 import dotenv from 'dotenv';
-import {
-  CandidateProfile,
-  extractProfile,
-  getDriver,
-  printProfile,
-  reactToProfile,
-} from './automator';
+import { getMessage } from './chat';
 import { Profile } from './chat/types';
-import { getScore } from './mainThread';
-import { sleep } from './utils';
+import { DUMMY_IMAGE } from './test/dummy';
 
 dotenv.config();
 
@@ -28,25 +21,29 @@ const DUMMY_THEM: Profile = {
 };
 
 (async () => {
-  const SCORE_THRESHOLD = 0.8;
-
-  let totalSwipes = 0;
-  const driver = await getDriver();
-  let profiles: CandidateProfile[] = [];
-
-  await driver.get('https://tinder.com/app/recs');
-  await sleep(5_000);
-
-  while (true) {
-    let profile = await extractProfile(driver);
-    const score = await getScore(profile);
-    profile = await reactToProfile(driver, profile, score > SCORE_THRESHOLD);
-    profiles.push(profile);
-    // writeFileSync('./profiles.json', JSON.stringify(profiles, null, 2));
-    await printProfile(profile);
-    await sleep(2000);
-
-    // TODO(shaya)
-    // await considerProfileUpdates(profile as any);
-  }
+  console.log(await getMessage(DUMMY_ME, DUMMY_THEM, [], true));
 })();
+
+// (async () => {
+//   const SCORE_THRESHOLD = 0.8;
+
+//   let totalSwipes = 0;
+//   const driver = await getDriver();
+//   let profiles: CandidateProfile[] = [];
+
+//   await driver.get('https://tinder.com/app/recs');
+//   await sleep(5_000);
+
+//   while (true) {
+//     let profile = await extractProfile(driver);
+//     const score = await getScore(profile);
+//     profile = await reactToProfile(driver, profile, score > SCORE_THRESHOLD);
+//     profiles.push(profile);
+//     // writeFileSync('./profiles.json', JSON.stringify(profiles, null, 2));
+//     await printProfile(profile);
+//     await sleep(2000);
+
+//     // TODO(shaya)
+//     // await considerProfileUpdates(profile as any);
+//   }
+// })();

@@ -44,6 +44,10 @@ export class GPT {
     images: string[], // base64 encoded images
     maxTokensToSample: number = 300,
   ): Promise<string> {
+    if (images.length === 0) {
+      return '';
+    }
+
     const completion = await this.client.chat.completions.create({
       messages: [
         {

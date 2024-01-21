@@ -2,7 +2,7 @@ import { PromptBuilder } from './PromptBuilder';
 import { Message, Profile } from './types';
 
 export const SYSTEM_PROMPT =
-  "You are messaging matches on a dating app. Your purpose is to maximize your chance of getting your match's phone number. Use the information you know about your match to keep the conversation going. Be witty and relevant. Keep messages concise and don't ask more than one question at a time. Do not answer your own questions.";
+  "You are messaging matches on a dating app. Your purpose is to maximize your chance of getting your match's phone number. Use the information you know about your match to keep the conversation going. Be witty and relevant. Keep messages short and don't ask more than one question at a time. Do not answer your own questions. Don't capitalize or use proper punctuation. Be casual and conversational. Don't be cringe.";
 
 export function constructPrompt(
   selfProfile: Profile,
@@ -21,7 +21,7 @@ function constructFirstPrompt(selfProfile: Profile, otherProfile: Profile) {
     {
       name: 'your profile',
       description: "Here's what your match knows about you:",
-      content: selfProfile.texts,
+      content: selfProfile.texts.concat(selfProfile.images),
     },
     {
       name: 'their profile',
