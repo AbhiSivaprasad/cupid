@@ -31,7 +31,7 @@ def _process_model_output(model_output) -> Optional[ImageAnnotations]:
     Process the result of a model API call from a single image
     """
     if len(model_output) != 1:
-        return None
+        raise ValueError(f"unexpected model output length: {len(model_output)}")
 
     model_output = model_output[0]
 
@@ -75,9 +75,13 @@ def get_image_annotations(image_paths = List[str], model_name='VGG-Face') -> Ima
         except:
             # if no face is detected, skip image
             continue
-        processed_model_output = _process_model_output(model_output)
-        if processed_model_output:
+        try:
+            processed_model_output = _process_model_output(model_output)
             processed_model_results.append(processed_model_output)
+        except Exception as e:
+            print(image_path)
+            print(e)
+            continue
     
     images_annotations = ImagesAnnotations(
         embeddings=np.array([result.embedding for result in processed_model_results]),

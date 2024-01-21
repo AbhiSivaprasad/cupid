@@ -27,8 +27,6 @@ def construct_training_data(base_dataset_path: str = BASE_DATASET_PATH):
 
     # combine and make reponder
     embeddings = np.vstack([negative_embeddings, positive_embeddings])
-    import pdb
-    pdb.set_trace()
     zeros = np.zeros(negative_embeddings.shape[0])
     ones = np.ones(positive_embeddings.shape[0])
     responder = np.concatenate([zeros, ones])
@@ -45,4 +43,4 @@ def load_processed_data(base_dataset_path: str = BASE_DATASET_PATH):
 
 
 if __name__ == "__main__":
-    X, y = construct_training_data()
+    construct_training_data()
