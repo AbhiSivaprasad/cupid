@@ -6,7 +6,7 @@ import {
   goToMyProfile,
   goToCandidates,
 } from './improve-profile/stubbedfunctions';
-import { delay } from './utils';
+import { sleep } from './utils';
 export function doSetup() {
   // add all the setup you need here so that all of the functions in stubbedFunctions are fully callable.
 }
@@ -49,7 +49,7 @@ export async function mainThread(options: {
         return;
       }
     }
-    await delay(options.waitBetweenRoundsSeconds * 1000);
+    await sleep(options.waitBetweenRoundsSeconds * 1000);
     await considerProfileUpdates();
   }
 }
