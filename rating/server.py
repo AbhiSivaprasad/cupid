@@ -12,8 +12,10 @@ from collections import Counter
 import random
 from training.trainer import Classifier
 from training.eval import eval
+from training.eval import load_model
 
 app = Flask(__name__)
+model = load_model()
 
 def decode_image_and_convert_to_jpeg(base64_image, jpg_path):
     # Decode the base64 image
@@ -47,7 +49,6 @@ def crop_array(arr, bbox):
 @app.route('/imageEmbedding', methods=['POST'])
 def image_embedding():
     data = request.json()
-    print(data)
     image = decode_image(data)
     embedding = get_image_embedding(image)
     return jsonify(embedding)
@@ -63,7 +64,7 @@ def facial_rating():
     decode_image_and_convert_to_jpeg(data['image'], image_path)
 
     # get rating for an image
-    output = eval(image_path)
+    output = eval(model, image_path)
     return output
 
 @app.route('/ratingPrediction', methods=['POST'])
